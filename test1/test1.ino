@@ -15,6 +15,7 @@
  * R2 = 330 Ohm
  *
  * https://www.pololu.com/product/1182
+ * A4988 Stepper Motor Driver Carrier
  */
 
 
@@ -23,8 +24,8 @@
 
 const int stepsPerRevolution = 200;  // Nema17 motor has 200 steps in 360 degrees rotation
 
-// initialize the stepper library on pins 8 through 11:
-Stepper myStepper(stepsPerRevolution, 8, 9, 10, 11);  // pins 8,9 go to PULL+ & PULL- , pins 10,11 go to DIR+ & DIR-
+// initialize the stepper library on pins 8 and 10:
+Stepper myStepper(stepsPerRevolution, 8, 10);  // pins 8,9 go to PULL+ & PULL- , pins 10,11 go to DIR+ & DIR-
 
 int tracknumber = 2;          // SET HOW MANY TRACKS YOU WANT UP AND BACK
 int trackdistance = 20000;
@@ -43,6 +44,8 @@ int bottomspeed = 1;          // start and end speed of RAMP up/down
 
 int benspeed = 1;             // current speed
 
+int onepersecondspeed = 60;   // speed as 1 rotation per second
+
 void setup() {
   // put your setup code here, to run once:
 
@@ -50,14 +53,9 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if (goforit == 1)
-  {
-    moveit();
-  }
-  else
-  {
-    donothing();
-  }
+  myStepper.setSpeed(onepersecondspeed);
+  myStepper.step(stepsPerRevolution);
+  delay(1000);                       // wait for a second
 }
 
 void moveit() {
@@ -84,8 +82,7 @@ void moveit() {
     if (moves >=2) motiondirection = forwardsincrement , moves = 0;
     if (actualtracknumber >= tracknumber * 2 )  // when the motor has done forward and back the TRACKNUMBER amount set then back to void();
     {
-      goforit = 0;
-      return;
+      donothing();
     }
   }
 }
