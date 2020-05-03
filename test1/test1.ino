@@ -18,89 +18,33 @@
  * A4988 Stepper Motor Driver Carrier
  */
 
+// Run a A4998 Stepstick from an Arduino UNO.
+// Paul Hurley Aug 2015
+int x;
+#define BAUD (9600)
 
-// include stepper library
-#include <Stepper.h>
 
-const int stepsPerRevolution = 200;  // Nema17 motor has 200 steps in 360 degrees rotation
-
-// initialize the stepper library on pins 8 and 10:
-Stepper myStepper(stepsPerRevolution, 8, 10);  // pins 8,9 go to PULL+ & PULL- , pins 10,11 go to DIR+ & DIR-
-
-int tracknumber = 2;          // SET HOW MANY TRACKS YOU WANT UP AND BACK
-int trackdistance = 20000;
-
-int actualtracknumber = 0;    // current track number
-
-int motiondirection = 2;      // set initial forward motor increments.
-int forwardsincrement = 2;    // forward
-int backwardsincrement = -2;  // backwards
-
-int moves = 0;                // current move number
-int goforit = 1;              // start or stop the move ?
-
-int topspeed = 3201;          // TOP SPEED OF TRACKING
-int bottomspeed = 1;          // start and end speed of RAMP up/down
-
-int benspeed = 1;             // current speed
-
-int onepersecondspeed = 60;   // speed as 1 rotation per second
-
-void setup() {
-  // put your setup code here, to run once:
-
+void setup()
+{
+  Serial.begin(BAUD);
+  pinMode(6,OUTPUT); // Enable
+  pinMode(5,OUTPUT); // Step
+  pinMode(4,OUTPUT); // Dir
+  digitalWrite(6,LOW); // Set Enable low
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-  myStepper.setSpeed(onepersecondspeed);
-  myStepper.step(stepsPerRevolution);
-  delay(1000);                       // wait for a second
-}
-
-void moveit() {
-
-  int x = 1;
-  for (int i = 50; i > -1; i = i + x )
+void loop()
+{
+  digitalWrite(6,LOW); // Set Enable low
+  digitalWrite(4,HIGH); // Set Dir high
+  Serial.println("Loop 200 steps (1 rev)");
+  for(x = 0; x < 200; x++) // Loop 200 times
   {
-    if (i >= topspeed)
-    {
-      topspeedhold();    // hold top speed for trackdistance variable
-      x = -1;            // switch direction at peak
-    }
-    if (i <= bottomspeed)
-    {
-      x = +1; // switch direction at troff
-      moves++;
-      actualtracknumber++;
-    }
-    int benspeed=i;
-    myStepper.setSpeed(benspeed);
-    myStepper.step(motiondirection);
-
-    if (moves >=1) motiondirection = backwardsincrement; // switch direction 
-    if (moves >=2) motiondirection = forwardsincrement , moves = 0;
-    if (actualtracknumber >= tracknumber * 2 )  // when the motor has done forward and back the TRACKNUMBER amount set then back to void();
-    {
-      donothing();
-    }
+    digitalWrite(5,HIGH); // Output high
+    delay(10); // Wait
+    digitalWrite(5,LOW); // Output low
+    delay(100); // Wait
   }
-}
-
-void topspeedhold() {  // hold top speed for trackdistance variable
-
-  int f = 1;
-  for (int f = 50; f > -1; f = f + 1 )
-  {
-    if (f >= trackdistance)
-    {
-      return;
-    }
-    myStepper.setSpeed(topspeed);
-    myStepper.step(motiondirection);
-  }
-}
-
-void donothing() {
-  while(1);
+  Serial.println("Pause");
+  delay(1000); // pause one second
 }
